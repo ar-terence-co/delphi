@@ -186,6 +186,10 @@ class StockDataManager():
         stock = StockData(stock_code,stock_data)
         return stock
     
+    def getBluechips(self):
+        bluechips = pd.read_csv(self.file_dir + '/bluechips.csv', header=None).values[0].tolist()
+        return bluechips
+    
 class StockData():
     
     def __init__(self, stock_code, data):

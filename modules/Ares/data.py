@@ -3,7 +3,7 @@
 from datetime import datetime
 import numpy as np
 
-class AkaiData():
+class AresData():
     def __init__(self, manager):
         self.manager = manager
         #date_index = 0
@@ -28,10 +28,9 @@ class AkaiData():
             snapshots = []
             stock = self.manager.getStockData(code)
             stock.requestData(indicators)
-            stock_data = stock.atIndeces(range(
-                stock.getIndexFromDate(start_date.strftime('%Y-%m-%d'),roundToPrevious=False) - snapshot_duration,
-                stock.getIndexFromDate(end_date.strftime('%Y-%m-%d'),roundToPrevious=True) + 1
-            ))
+            start_index = stock.getIndexFromDate(start_date.strftime('%Y-%m-%d'),roundToPrevious=False) - snapshot_duration
+            end_index = stock.getIndexFromDate(end_date.strftime('%Y-%m-%d'),roundToPrevious=True) + 1
+            stock_data = stock.atIndeces(range(start_index if start_index > -1 else 0, end_index))
             scores = self._compute_scores(stock_data, risk, reward)[snapshot_duration:]
             for i in range(snapshot_duration - 1,len(stock_data)):
                 snapshot_data = stock_data[i - snapshot_duration + 1:i + 1,1:]
@@ -41,9 +40,7 @@ class AkaiData():
                 if scores[i] != -1:
                     X_data.append(snapshots[i])
                     Y_data.append(scores[i])
-        shuffled_indeces = np.arange(0,len(Y_data))
-        np.random.shuffle(shuffled_indeces)
-        return (np.array(X_data)[shuffled_indeces], np.array(Y_data)[shuffled_indeces])
+        return (np.array(X_data).astype(float), np.array(Y_data).reshape(len(Y_data),1))
     
     def _compute_scores(self, stock_data, risk = 0.08, reward = 3.0):
         scores = []
