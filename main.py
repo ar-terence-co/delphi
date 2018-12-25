@@ -13,10 +13,6 @@ current_date = None
 #Global data parameters (for viewing)
 X_train = None
 Y_train = None
-train_images = None
-train_labels = None
-eval_images = None
-eval_labels = None
 
 X_test = None
 Y_test = None
@@ -30,10 +26,12 @@ ai = DelphiAI()
 additional_indicators = []
 risk = 0.08
 reward = 3.0
-snapshot_duration = 100
+snapshot_duration = 128
 
 #Check performance of multiple models
-evaluations = {}
+train_performance = {}
+validations_performance = {}
+test_performance = {}
 predictions = {}
 
 def run():  
@@ -45,28 +43,24 @@ def setup():
     load_new_data()
     load_training_data()
     load_testing_data()    
-    
-def run_training():
-    for i in range(10):
-        epochs = i * 2 + 1
-        for j in range(5):
-            model_name = 'ares_network_'+str(epochs)+'_'+str(j)
-            load_delphi(model_name)
-            train_delphi(
-                split=0.7,
-                epochs=epochs
-            )
-            evaluate_delphi()
+
+            
+def run_training(model_type, model_name, epochs):
+    global X_train, Y_train, X_test, Y_test
+    load_delphi(model_type, model_name)
+    train_delphi(
+            X_train,
+            Y_train,
+            split=0.8,
+            epochs=epochs
+        )
+    evaluate_delphi(X_test, Y_test)
           
-def run_test():
+def run_test(model_type, model_name):
     global X_test, Y_test
-    for i in range(10):
-        epochs = i * 2 + 1
-        for j in range(5):
-            model_name = 'ares_network_'+str(epochs)+'_'+str(j)
-            load_delphi(model_name)
-            evaluate_delphi()
-            predict_with_delphi(X_test, Y_test)
+    load_delphi(model_type, model_name)
+    evaluate_delphi(X_test, Y_test)
+    predict_with_delphi(X_test, Y_test)
 
 def load_new_data():
     global current_date
@@ -122,43 +116,47 @@ def load_testing_data(
     )
     
     
-def load_delphi(model_name):
+def load_delphi(model_type, model_name):
     global ai
     global additional_indicators, snapshot_duration
     
     print('Loading Delphi with "'+model_name+'" configuration...')
     ai.setup(
+        model_type=model_type,
         model_name=model_name,
         image_shape=(snapshot_duration, len(additional_indicators) + 4)
     )
     
     
 def train_delphi(
+    images,
+    labels,
     split=0.7,
     epochs=100
 ): 
-    global X_train, Y_train
-    global train_images, train_labels, eval_images, eval_labels
     global ai
+    global train_performance, validations_performance
     
     train_images, train_labels, eval_images, eval_labels = ai.split_dataset(
-        X_train, Y_train, split=split
+        images, labels, split=split
     )        
 
     print('Training Delphi "'+ai.current_model+'"...')
     ai.train(train_images, train_labels, epochs=epochs)
-    ai.evaluate(eval_images, eval_labels)
+    train_performance[ai.current_model] = ai.evaluate(train_images, train_labels)
+    validations_performance[ai.current_model] = ai.evaluate(eval_images, eval_labels)
     print('TRAIN DONE')
+    return train_performance[ai.current_model].copy(), validations_performance[ai.current_model].copy()
     
     
-def evaluate_delphi(): 
-    global X_test, Y_test
+def evaluate_delphi(images, labels): 
     global ai
-    global evaluations   
+    global test_performance   
 
     print('Evaluating Delphi "'+ai.current_model+'"with test data...')
-    evaluations[ai.current_model] = ai.evaluate(X_test, Y_test)
+    test_performance[ai.current_model] = ai.evaluate(images, labels)
     print('EVAL DONE')
+    return test_performance[ai.current_model].copy()
     
     
 def predict_with_delphi(images,expected_labels = None): 
@@ -170,21 +168,30 @@ def predict_with_delphi(images,expected_labels = None):
     
     preds = []
     for result in prediction:
-        preds.append([result['classes'][0],result['probabilities'][0]])
+        preds.append([result['classes'],result['probabilities'][1]])
     preds = np.array(preds)
     if expected_labels is not None:
         preds = np.append(expected_labels,preds,axis=1)
     predictions[ai.current_model] = preds
     
     print('PREDICT DONE')
+    return preds.copy()
     
 
-def plot_training_images(start):
-    plt.figure(figsize=(10,10))
-    for i in range(start,start+20):
-        plt.subplot(1,20,i+1)
-        plt.xticks([])
-        plt.yticks([])
-        plt.grid(False)
-        plt.imshow((train_images[i]*255).astype(int), cmap=plt.cm.binary)
-        plt.xlabel(train_labels[i])
+def plot_images(images, labels):
+    colors = ['r','b','g','y']
+    s = images.shape
+    
+    t = np.linspace(0, s[1], num=s[1])
+    
+    plt.figure(figsize=(2*s[2],2*s[0]))
+    for i in range(s[0]):
+        image = images[i]
+        for j in range(0, s[2]):
+            plt.subplot(s[0],s[2],i*s[2] + j + 1)
+            plt.plot(t, image[:,j], colors[j % len(colors)])
+            plt.xticks([])
+            plt.yticks([])
+            plt.grid(False)
+            if j == 0:
+                plt.ylabel('PROFIT' if labels[i][0] == 1 else 'LOSS')

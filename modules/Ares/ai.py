@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import tensorflow as tf
-from tensorflow import keras
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-from modules.Ares.estimators import cnn_alpha
 
 class AresAI():
         
@@ -26,9 +23,17 @@ class AresAI():
         
         return (X[train_indeces], Y[train_indeces], X[test_indeces], Y[test_indeces])
     
-    def setup(self, model_name, image_shape):
+    def setup(self, model_type, model_name, image_shape):
+        try:
+            module = __import__('modules.Ares.estimators.' + model_type, fromlist=[None])
+            print(module)
+            model_fn = getattr(module, model_type)
+        except ImportError:
+            module = __import__('modules.Ares.estimators.network_alpha')
+            model_fn = getattr(module, 'network_alpha')
+            
         self.estimator = tf.estimator.Estimator(
-            model_fn=cnn_alpha,
+            model_fn=model_fn,
             model_dir='saved/' + model_name,
             params={
                 "shape": image_shape
@@ -43,20 +48,20 @@ class AresAI():
         train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": train_images},
             y=train_labels,
-            batch_size=100,
+            batch_size=32,
             num_epochs=epochs,
             shuffle=True
         )
         
-        # tensors_to_log = {'probabilities':'probabilities_tensor'}
-        # logging_hook = tf.train.LoggingTensorHook(
-        #         tensors=tensors_to_log, every_n_iter=50
-        # )
+        tensors_to_log = {'probabilities':'softmax_tensor'}
+        logging_hook = tf.train.LoggingTensorHook(
+                tensors=tensors_to_log, every_n_iter=50
+        )
         
         self.estimator.train(
             input_fn=train_input_fn,
             steps=None,
-            # hooks=[logging_hook]
+            hooks=[logging_hook]
         )
         
     def evaluate(self, eval_images, eval_labels):
@@ -88,5 +93,4 @@ class AresAI():
         predictions = self.estimator.predict(
             input_fn=predict_input_fn
         )
-        print(predictions)
         return predictions
