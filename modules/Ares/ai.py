@@ -11,13 +11,14 @@ class AresAI():
         self.estimator = None
         self.current_model = None
     
-    def split_dataset(self, X, Y, split=0.7):
+    def split_dataset(self, X, Y, split=0.7, batch_size=32):
         if len(X) != len(Y):
             raise ValueError('Images and labels must have the same length')
         
         shuffled_indeces = np.arange(0,len(Y))
         np.random.shuffle(shuffled_indeces)
-        split = int(np.ceil(len(Y) * 0.7))
+        split = int(np.ceil(len(Y) * split))
+        split = split - (split % batch_size)
         train_indeces = shuffled_indeces[0:split]
         test_indeces = shuffled_indeces[split:len(Y)]
         
@@ -53,7 +54,12 @@ class AresAI():
             shuffle=True
         )
         
-        tensors_to_log = {'probabilities':'softmax_tensor'}
+        tensors_to_log = {'probabilities':'probabilities_tensor',
+                          'conv2_0':'conv2_0_tensor/conv1d/Squeeze','conv2_bn_0':'conv2_bn_0_tensor',
+                          'conv2_1':'conv2_1_tensor/conv1d/Squeeze','conv2_bn_1':'conv2_bn_1_tensor',
+                          'conv2_2':'conv2_2_tensor/conv1d/Squeeze','conv2_bn_2':'conv2_bn_2_tensor',
+                          'conv2_3':'conv2_3_tensor/conv1d/Squeeze','conv2_bn_3':'conv2_bn_3_tensor',
+                          }
         logging_hook = tf.train.LoggingTensorHook(
                 tensors=tensors_to_log, every_n_iter=50
         )
