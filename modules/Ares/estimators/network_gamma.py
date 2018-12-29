@@ -9,7 +9,7 @@ def network_gamma(features, labels, mode, params):
     
     #Convolution 1 128 dim and 64 channels x 4
     conv1 = input_layer
-    for i in range(6):
+    for i in range(4):
         conv1 = tf.layers.conv1d(
             inputs=conv1,
             filters=64,
@@ -29,7 +29,7 @@ def network_gamma(features, labels, mode, params):
         )
         conv1 = tf.nn.relu(bn1)        
     conv1_size = input_layer_size
-
+    
     #Max Pooling 1 64 dim
     pool1 = tf.layers.max_pooling1d(
             inputs=conv1, 
@@ -40,17 +40,15 @@ def network_gamma(features, labels, mode, params):
     
     #Convolution 2 64 dim and 128 channels x 4
     conv2 = pool1
-    for i in range(8):
+    for i in range(4):
         conv2 = tf.layers.conv1d(
             inputs=conv2,
             filters=128,
             kernel_size=[3],
             padding='same',
             use_bias=False,
-            activation=None,
-            name='conv2_'+str(i)+'_tensor'
+            activation=None
         )
-        print(conv2)
         bn2 = tf.layers.batch_normalization(
             inputs=conv2,
             axis=-1,
@@ -60,7 +58,7 @@ def network_gamma(features, labels, mode, params):
             scale=True,
             training=mode == tf.estimator.ModeKeys.TRAIN,
         )
-        conv2 = tf.nn.relu(bn2, name='conv2_bn_'+str(i)+'_tensor')    
+        conv2 = tf.nn.relu(bn2)    
     conv2_size = pool1_size
     
     #Max Pooling  2 32 dim
@@ -73,7 +71,7 @@ def network_gamma(features, labels, mode, params):
     
     #Convolution 3 32 dim and 256 channels x 4
     conv3 = pool2
-    for i in range(12):
+    for i in range(4):
         conv3 = tf.layers.conv1d(
             inputs=conv3,
             filters=256,
@@ -104,14 +102,14 @@ def network_gamma(features, labels, mode, params):
     
     #Convolution 4 16 dim and 512 channels x 4
     conv4 = pool3
-    for i in range(6):
+    for i in range(4):
         conv4 = tf.layers.conv1d(
             inputs=conv4,
             filters=512,
             kernel_size=[3],
             padding='same',
             use_bias=False,
-            activation=None,
+            activation=None
         )
         bn4 = tf.layers.batch_normalization(
             inputs=conv4,
@@ -135,13 +133,13 @@ def network_gamma(features, labels, mode, params):
     
     flattened_conv = tf.reshape(pool4, [-1, pool4_size * 512])
     
-    #Fully Connected Layer
+    #Fully Connected Layers with Dropout
     dense1 = tf.layers.dense(
             inputs=flattened_conv,
-            units=2048,
+            units=1024,
             use_bias=False,
             activation=None
-    )    
+    )
     bn_dense1 = tf.layers.batch_normalization(
             inputs=dense1,
             axis=-1,
@@ -151,44 +149,24 @@ def network_gamma(features, labels, mode, params):
             scale=True,
             training=mode == tf.estimator.ModeKeys.TRAIN,
     )
-    dense1 = tf.nn.relu(bn_dense1)
-    
-    dense2 = tf.layers.dense(
-            inputs=dense1,
-            units=1024,
-            use_bias=False,
-            activation=None
-    )
-    bn_dense2 = tf.layers.batch_normalization(
-            inputs=dense2,
-            axis=-1,
-            momentum=0.9,
-            epsilon=0.01,
-            center=True,
-            scale=True,
-            training=mode == tf.estimator.ModeKeys.TRAIN,
-    )
-    dense2 = tf.nn.relu(bn_dense2)  
+    dense1 = tf.nn.relu(bn_dense1)    
 
+    
     #Logits
     logits=tf.layers.dense(
-            inputs=dense2,
-            units=1
+            inputs=dense1,
+            units=2
     )
-    
-    #Probabilities
-    probabilities = tf.nn.sigmoid(logits, name='probabilities_tensor')
-    
     #Prediction
     predictions={
-        'classes': tf.to_float(tf.greater_equal(probabilities,0.5)),
-        'probabilities': probabilities
+        'classes': tf.argmax(logits, axis=1),
+        'probabilities': tf.nn.softmax(logits, name='softmax_tensor')
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
     
     #Training
-    loss = tf.losses.sigmoid_cross_entropy(multi_class_labels=labels, logits=logits)
+    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
     
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.AdamOptimizer()

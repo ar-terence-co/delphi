@@ -168,7 +168,7 @@ def predict_with_delphi(images,expected_labels = None):
     
     preds = []
     for result in prediction:
-        preds.append([result['classes'][0],result['probabilities'][0]])
+        preds.append([result['classes'],result['probabilities'][1]])
     preds = np.array(preds)
     if expected_labels is not None:
         preds = np.append(expected_labels,preds,axis=1)
