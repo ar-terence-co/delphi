@@ -1,6 +1,6 @@
 # delphi
 
-Netowrk Alpha, Beta, Gamma -> Failed
+# Netowrk Alpha, Beta, Gamma -> Failed
 
 # Network Delta [in:64 res:64,128,256,512 fc:1024]
 
