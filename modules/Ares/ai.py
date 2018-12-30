@@ -23,7 +23,7 @@ class AresAI():
         
         return (X[train_indeces], Y[train_indeces], X[test_indeces], Y[test_indeces])
     
-    def setup(self, model_type, model_name, image_shape):
+    def setup(self, model_type, model_name, image_shape, filters=[64,64,128,256,512,1024]):
         try:
             module = __import__('modules.Ares.estimators.' + model_type, fromlist=[None])
             print(module)
@@ -36,7 +36,8 @@ class AresAI():
             model_fn=model_fn,
             model_dir='saved/' + model_name,
             params={
-                "shape": image_shape
+                "shape": image_shape,
+                "filters": filters
             }
         )
         self.current_model = model_name

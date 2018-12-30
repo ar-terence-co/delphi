@@ -23,7 +23,7 @@ data_manager = DelphiData(stock_manager)
 ai = DelphiAI()
 
 #Hyperparameters
-additional_indicators = ['ema-18', 'ema-50', 'ema-100']
+additional_indicators = [] # ['ema-18', 'ema-50', 'ema-100']
 risk = 0.08
 reward = 3.0
 snapshot_duration = 128
@@ -77,7 +77,7 @@ def load_new_data():
     
 def load_training_data(
     stock_codes=stock_manager.getBluechips(), 
-    start_date=datetime.strptime('2011-12-31','%Y-%m-%d'),
+    start_date=datetime.strptime('2006-12-31','%Y-%m-%d'),
     end_date=datetime.strptime('2016-12-31','%Y-%m-%d'),
 ): 
     global X_train, Y_train
@@ -117,7 +117,7 @@ def load_testing_data(
     )
     
     
-def load_delphi(model_type, model_name):
+def load_delphi(model_type, model_name, filters=[64,64,128,256,512,1024]):
     global ai
     global additional_indicators, snapshot_duration
     
@@ -125,7 +125,8 @@ def load_delphi(model_type, model_name):
     ai.setup(
         model_type=model_type,
         model_name=model_name,
-        image_shape=(snapshot_duration, len(additional_indicators) + 4)
+        image_shape=(snapshot_duration, len(additional_indicators) + 4),
+        filters=filters
     )
     
     

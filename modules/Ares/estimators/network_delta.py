@@ -7,9 +7,10 @@ def network_delta(features, labels, mode, params):
     #(IN: ?, 128, 4)
     input_layer = tf.to_float(features['x'])
     input_layer_size = params['shape'][0]
+    filters = params['filters']
     
     #Input filter (IN: ?, 128, 4 OUT: ?, 128, 64)
-    filters_in = 64
+    filters_in = filters[0]
     conv_in = tf.layers.conv1d(
         inputs=input_layer,
         filters=filters_in,
@@ -28,7 +29,7 @@ def network_delta(features, labels, mode, params):
     conv_in_size = input_layer_size
     
     #RESNET Block 1 64, 64, 256 (IN; ?, 128, 64 OUT: ?, 128, 256)
-    filters_1 = 64 
+    filters_1 = filters[1]
     conv_1 = conv_in
     for i in range(3):
         conv_1 = tf.layers.conv1d(
@@ -91,7 +92,7 @@ def network_delta(features, labels, mode, params):
     pool_1_size = conv_1_size / 2
 
     #RESNET Block 2 128, 128, 512 (IN; ?, 64, 256 OUT: ?, 64, 512)
-    filters_2 = 128 
+    filters_2 = filters[2] 
     conv_2 = pool_1
     for i in range(3):
         conv_2 = tf.layers.conv1d(
@@ -154,7 +155,7 @@ def network_delta(features, labels, mode, params):
     pool_2_size = conv_2_size / 2
     
     #RESNET Block 3 256, 256, 1024 (IN; ?, 32, 512 OUT: ?, 32, 1024)
-    filters_3 = 256 
+    filters_3 = filters[3] 
     conv_3 = pool_2
     for i in range(3):
         conv_3 = tf.layers.conv1d(
@@ -217,7 +218,7 @@ def network_delta(features, labels, mode, params):
     pool_3_size = conv_3_size / 2    
     
     #RESNET Block 4 512, 512, 2048 (IN; ?, 16, 1024 OUT: ?, 16, 2048)
-    filters_4 = 512 
+    filters_4 = filters[4] 
     conv_4 = pool_3
     for i in range(3):
         conv_4 = tf.layers.conv1d(
@@ -286,7 +287,7 @@ def network_delta(features, labels, mode, params):
     #Fully Connected Layer 1 (IN: ?, 16384 OUT: ?, 1000)
     dense_fc = tf.layers.dense(
             inputs=flatten,
-            units=1024,
+            units=filters[5],
             use_bias=False,
             activation=None
     )
