@@ -53,16 +53,18 @@ class AresAI():
             shuffle=True
         )
         
-        tensors_to_log = {'probabilities':'softmax_tensor'}
+        tensors_to_log = {'probabilities':'probabilities_tensor'}
         logging_hook = tf.train.LoggingTensorHook(
                 tensors=tensors_to_log, every_n_iter=50
         )
         
-        self.estimator.train(
+        train_results = self.estimator.train(
             input_fn=train_input_fn,
             steps=None,
             hooks=[logging_hook]
         )
+        print(train_results)
+        return train_results
         
     def evaluate(self, eval_images, eval_labels):
         if self.estimator is None:

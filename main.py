@@ -23,12 +23,13 @@ data_manager = DelphiData(stock_manager)
 ai = DelphiAI()
 
 #Hyperparameters
-additional_indicators = []
+additional_indicators = ['ema-18', 'ema-50', 'ema-100']
 risk = 0.08
 reward = 3.0
 snapshot_duration = 128
 
 #Check performance of multiple models
+train_progress = {}
 train_performance = {}
 validations_performance = {}
 test_performance = {}
@@ -135,14 +136,14 @@ def train_delphi(
     epochs=100
 ): 
     global ai
-    global train_performance, validations_performance
+    global train_performance, validations_performance, train_progress
     
     train_images, train_labels, eval_images, eval_labels = ai.split_dataset(
         images, labels, split=split
     )        
 
     print('Training Delphi "'+ai.current_model+'"...')
-    ai.train(train_images, train_labels, epochs=epochs)
+    train_progress[ai.current_model] = ai.train(train_images, train_labels, epochs=epochs)
     train_performance[ai.current_model] = ai.evaluate(train_images, train_labels)
     validations_performance[ai.current_model] = ai.evaluate(eval_images, eval_labels)
     print('TRAIN DONE')
@@ -165,10 +166,12 @@ def predict_with_delphi(images,expected_labels = None):
 
     print('Predicting with Delphi "'+ai.current_model+'"...')
     prediction = ai.predict(images)
-    
     preds = []
     for result in prediction:
-        preds.append([result['classes'],result['probabilities'][1]])
+        preds.append([result['classes_t0.3'][0],
+                      result['classes_t0.5'][0], 
+                      result['classes_t0.7'][0], 
+                      result['probabilities'][0]])
     preds = np.array(preds)
     if expected_labels is not None:
         preds = np.append(expected_labels,preds,axis=1)
