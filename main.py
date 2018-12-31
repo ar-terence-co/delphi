@@ -9,6 +9,7 @@ from modules.Ares.ai import AresAI as DelphiAI
 
 #Date Parameters
 current_date = None
+check = None
 
 #Global data parameters (for viewing)
 X_train = None
@@ -23,7 +24,7 @@ data_manager = DelphiData(stock_manager)
 ai = DelphiAI()
 
 #Hyperparameters
-additional_indicators = [] # ['ema-18', 'ema-50', 'ema-100']
+indicators = ['Close','Open','High','Low','EMA-18','EMA-50','EMA-100']
 risk = 0.08
 reward = 3.0
 snapshot_duration = 128
@@ -65,6 +66,7 @@ def run_test(model_type, model_name):
 
 def load_new_data():
     global current_date
+    global check
     current_date = datetime.now().strftime('%Y-%m-%d')
     print("Computing today's data: " + current_date)
     
@@ -82,12 +84,12 @@ def load_training_data(
 ): 
     global X_train, Y_train
     global data_manager
-    global additional_indicators, risk, reward, snapshot_duration
+    global indicators, risk, reward, snapshot_duration
 
     print('Loading training data...')
     X_train, Y_train = data_manager.create_dataset(
         stock_codes=stock_codes,
-        additional_indicators=additional_indicators,
+        indicators=indicators,
         risk=risk,
         reward=reward,
         snapshot_duration=snapshot_duration,
@@ -103,12 +105,12 @@ def load_testing_data(
 ): 
     global X_test, Y_test
     global data_manager
-    global additional_indicators, risk, reward, snapshot_duration
+    global indicators, risk, reward, snapshot_duration
  
     print('Loading testing data...')
     X_test, Y_test = data_manager.create_dataset(
         stock_codes=stock_codes,
-        additional_indicators=additional_indicators,
+        indicators=indicators,
         risk=risk,
         reward=reward,
         snapshot_duration=snapshot_duration,
@@ -119,13 +121,13 @@ def load_testing_data(
     
 def load_delphi(model_type, model_name, filters=[64,64,128,256,512,1024]):
     global ai
-    global additional_indicators, snapshot_duration
+    global indicators, snapshot_duration
     
     print('Loading Delphi with "'+model_name+'" configuration...')
     ai.setup(
         model_type=model_type,
         model_name=model_name,
-        image_shape=(snapshot_duration, len(additional_indicators) + 4),
+        image_shape=(snapshot_duration, len(indicators)),
         filters=filters
     )
     

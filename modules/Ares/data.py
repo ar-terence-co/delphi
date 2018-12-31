@@ -12,29 +12,31 @@ class AresData():
     def create_dataset(
             self,
             stock_codes,
-            additional_indicators = ['ema-18','ema-50','macd-9-18-50'],
+            indicators = ['Close','Open','High','Low','EMA-18','EMA-50','EMA-100'],
             risk = 0.08,
             reward = 3.0,
             snapshot_duration = 100,
             start_date = datetime.strptime('2005-12-31','%Y-%m-%d'),
-            end_date = datetime.now()
+            end_date = datetime.now(),
+            keep_incomplete = False
     ):
         X_data = []
         Y_data = []
-        indicators = ['close','open','high','low'] + additional_indicators
+        if 'Close' not in indicators:
+            indicators.append('Close')
         if start_date >= end_date: 
             return None
         for code in stock_codes:
             snapshots = []
-            stock = self.manager.getStockData(code)
-            stock.requestData(indicators)
-            start_index = stock.getIndexFromDate(start_date.strftime('%Y-%m-%d'),roundToPrevious=False) - snapshot_duration
-            end_index = stock.getIndexFromDate(end_date.strftime('%Y-%m-%d'),roundToPrevious=True) + 1
-            stock_data = stock.atIndeces(range(start_index if start_index > -1 else 0, end_index))
+            stock = self.manager.getStockData(code, indicators)
+            stock_data = stock.atDates(start_date, end_date, indicators)
+            stock_data = stock_data.dropna()
+            stock_data = stock_data.drop('Date', axis='columns')
             scores = self._compute_scores(stock_data, risk, reward)[snapshot_duration:]
-            for i in range(snapshot_duration - 1,len(stock_data)):
-                snapshot_data = stock_data[i - snapshot_duration + 1:i + 1,1:]
-                snapshot_data = self._normalize_snapshot(snapshot_data, indicators)
+            stock_values = stock_data.values
+            for i in range(snapshot_duration - 1,len(stock_values)):
+                snapshot_data = stock_values[i - snapshot_duration + 1:i + 1,:]
+                snapshot_data = self._normalize_snapshot(snapshot_data)
                 snapshots.append(snapshot_data)
             for i in range(0,len(scores)):
                 if scores[i] != -1:
@@ -45,7 +47,7 @@ class AresData():
     def _compute_scores(self, stock_data, risk = 0.08, reward = 3.0):
         scores = []
         gain = risk * reward
-        closes = stock_data[:,1]
+        closes = stock_data['Close'].values
         for i in range(0,len(closes)):
             take_profit = closes[i]*(1+gain)
             stop_loss = closes[i]*(1-risk)
@@ -61,9 +63,9 @@ class AresData():
                     break
             if not stopped:
                 scores.append(-1)
-        return scores
+        return scores #ndarray
     
-    def _normalize_snapshot(self, snapshot_data, indicators):
+    def _normalize_snapshot(self, snapshot_data):
         min_value = np.min(snapshot_data)
         max_value = np.max(snapshot_data)
         height = max_value - min_value
