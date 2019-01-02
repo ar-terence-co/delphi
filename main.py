@@ -24,7 +24,7 @@ data_manager = DelphiData(stock_manager)
 ai = DelphiAI()
 
 #Hyperparameters
-indicators = ['Close','Open','High','Low','EMA-18','EMA-50','EMA-100']
+indicators = ['Close','Open','High','Low','EMA-9','EMA-18','EMA-50']
 risk = 0.08
 reward = 3.0
 snapshot_duration = 128

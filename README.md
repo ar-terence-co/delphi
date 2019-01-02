@@ -160,5 +160,163 @@ Netowrk Alpha, Beta, Gamma -> Failed
  'recall_t0.5': 0.052554745,
  'recall_t0.7': 0.03649635
  }
+ 
+# Network Delta [in:32 res:32,64,128,256 fc:1024] Data 2006-2016 EMA-18,50,100
+
+ code: network_delta10_e10_f0.5_i7 
+ 10 Epochs, All res filters are reduced by half , EMA-18,50,100
+ training
+ {
+ 'accuracy_t0.3': 0.6618316,
+ 'accuracy_t0.5': 0.68996346,
+ 'accuracy_t0.7': 0.6750792,
+ 'global_step': 12699,
+ 'loss': 0.6382561,
+ 'precision_t0.3': 0.52607536,
+ 'precision_t0.5': 0.6090142,
+ 'precision_t0.7': 0.66640025,
+ 'recall_t0.3': 0.6324309,
+ 'recall_t0.5': 0.39292365,
+ 'recall_t0.7': 0.19906412
+ }
+ testing
+ {
+ 'accuracy_t0.3': 0.57419354,
+ 'accuracy_t0.5': 0.75885576,
+ 'accuracy_t0.7': 0.855143,
+ 'global_step': 12699,
+ 'loss': 0.5120564,
+ 'precision_t0.3': 0.15024559,
+ 'precision_t0.5': 0.14183836,
+ 'precision_t0.7': 0.1734104,
+ 'recall_t0.3': 0.48282266,
+ 'recall_t0.5': 0.16620241,
+ 'recall_t0.7': 0.027855154
+ }
+
+ code: network_delta10_e20_f0.5_i7
+ 20 Epochs, All res filters are reduced by half , EMA-18,50,100
+ training
+ {
+ 'accuracy_t0.3': 0.8713306,
+ 'accuracy_t0.5': 0.89245105,
+ 'accuracy_t0.7': 0.89093506,
+ 'global_step': 25397,
+ 'loss': 0.26575986,
+ 'precision_t0.3': 0.76594824,
+ 'precision_t0.5': 0.8350351,
+ 'precision_t0.7': 0.8882453,
+ 'recall_t0.3': 0.92646706,
+ 'recall_t0.5': 0.8747075,
+ 'recall_t0.7': 0.7981187
+ }
+ testing
+ {
+ 'accuracy_t0.3': 0.47668898,
+ 'accuracy_t0.5': 0.5549604,
+ 'accuracy_t0.7': 0.63700545,
+ 'global_step': 25397,
+ 'loss': 1.145494,
+ 'precision_t0.3': 0.13219178,
+ 'precision_t0.5': 0.13167666,
+ 'precision_t0.7': 0.1295216,
+ 'recall_t0.3': 0.53760445,
+ 'recall_t0.5': 0.42804086,
+ 'recall_t0.7': 0.3091922
+ }
+ 
+ code: network_delta10_e50_f0.5_i7_ALI
+ 50 Epochs, All res filters are reduced by half , EMA-18,50,100
+ training
+ {
+ 'accuracy_t0.3': 0.82700795,
+ 'accuracy_t0.5': 0.85481024,
+ 'accuracy_t0.7': 0.86849076,
+ 'global_step': 2480,
+ 'loss': 0.37854493,
+ 'precision_t0.3': 0.6730219,
+ 'precision_t0.5': 0.72805136,
+ 'precision_t0.7': 0.7769697,
+ 'recall_t0.3': 0.93509936,
+ 'recall_t0.5': 0.90066224,
+ 'recall_t0.7': 0.8490066
+ }
+ testing
+ {
+ 'accuracy_t0.3': 0.6,
+ 'accuracy_t0.5': 0.6378378,
+ 'accuracy_t0.7': 0.6864865,
+ 'global_step': 2480,
+ 'loss': 1.0489172,
+ 'precision_t0.3': 0.24675325,
+ 'precision_t0.5': 0.25,
+ 'precision_t0.7': 0.28301886,
+ 'recall_t0.3': 0.54285717,
+ 'recall_t0.5': 0.45714286,
+ 'recall_t0.7': 0.42857143
+ }
+ 
+ code: network_delta10_e100_f0.5_i7_ALI
+ 50 Epochs, All res filters are reduced by half , EMA-18,50,100
+ training
+ {
+ 'accuracy_t0.3': 0.9148279,
+ 'accuracy_t0.5': 0.9015887,
+ 'accuracy_t0.7': 0.8751103,
+ 'global_step': 4960,
+ 'loss': 0.41571522,
+ 'precision_t0.3': 0.92705166,
+ 'precision_t0.5': 0.95238096,
+ 'precision_t0.7': 0.9573643,
+ 'recall_t0.3': 0.80794704,
+ 'recall_t0.5': 0.74172187,
+ 'recall_t0.7': 0.6543046
+ }
+ testing
+ {
+ 'accuracy_t0.3': 0.7864865,
+ 'accuracy_t0.5': 0.7918919,
+ 'accuracy_t0.7': 0.82972974,
+ 'global_step': 4960,
+ 'loss': 1.1527395,
+ 'precision_t0.3': 0.44705883,
+ 'precision_t0.5': 0.45454547,
+ 'precision_t0.7': 0.55737704,
+ 'recall_t0.3': 0.54285717,
+ 'recall_t0.5': 0.5,
+ 'recall_t0.7': 0.4857143
+ }
+ 
+ code: network_delta10_e150_f0.5_i7_ALI
+ 50 Epochs, All res filters are reduced by half , EMA-18,50,100
+ training
+ {
+ 'accuracy_t0.3': 0.6774051,
+ 'accuracy_t0.5': 0.67784643,
+ 'accuracy_t0.7': 0.6774051,
+ 'global_step': 7440,
+ 'loss': 11.711188,
+ 'precision_t0.3': 0.78571427,
+ 'precision_t0.5': 0.82051283,
+ 'precision_t0.7': 0.81578946,
+ 'recall_t0.3': 0.043708608,
+ 'recall_t0.5': 0.042384107,
+ 'recall_t0.7': 0.041059602
+ }
+ testing
+ {
+ 'accuracy_t0.3': 0.7810811,
+ 'accuracy_t0.5': 0.78918916,
+ 'accuracy_t0.7': 0.8054054,
+ 'global_step': 7440,
+ 'loss': 15.531642,
+ 'precision_t0.3': 0.0,
+ 'precision_t0.5': 0.0,
+ 'precision_t0.7': 0.0,
+ 'recall_t0.3': 0.0,
+ 'recall_t0.5': 0.0,
+ 'recall_t0.7': 0.0
+ }
+
 
 

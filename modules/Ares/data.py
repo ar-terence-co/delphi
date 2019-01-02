@@ -29,7 +29,10 @@ class AresData():
         for code in stock_codes:
             snapshots = []
             stock = self.manager.getStockData(code, indicators)
-            stock_data = stock.atDates(start_date, end_date, indicators)
+            start_index = stock.getIndexFromDate(start_date, for_end_index=False) - snapshot_duration
+            start_index = 0 if start_index < 0 else start_index
+            end_index = stock.getIndexFromDate(end_date, for_end_index=True)
+            stock_data = stock.atIndeces(start=start_index, end=end_index, columns=indicators)
             stock_data = stock_data.dropna()
             stock_data = stock_data.drop('Date', axis='columns')
             scores = self._compute_scores(stock_data, risk, reward)[snapshot_duration:]
